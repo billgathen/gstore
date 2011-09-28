@@ -56,7 +56,7 @@ module GStore
       canonical_resource += path
       canonical_resource += '?acl' if params[:acl]
       
-      authorization = 'GOOG1 ' + @access_key + ':' + sign((canonical_headers + canonical_resource).toutf8)
+      authorization = 'GOOG1 ' + @access_key + ':' + sign((canonical_headers + canonical_resource).encode("UTF-8"))
       
       if @debug
         puts
