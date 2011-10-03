@@ -94,10 +94,16 @@ module GStore
           if options[:outfile]
             File.open(options[:outfile], 'w') do |f|
               http.request(req, options[:data]) do |response|
+                lines_until_next_flush = 10000
+                flush_ct = lines_until_next_flush
                 response.read_body do |str|
                   f.write(str)
-                  f.flush
-                end
+                  if --flush_ct <= 0
+                    f.flush
+                    flush_ct = lines_until_next_flush
+                  end 
+                end 
+                f.flush
               end
             end
 
