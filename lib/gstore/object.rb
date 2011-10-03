@@ -5,13 +5,7 @@ module GStore
     end
     
     def get_object(bucket, filename, options={})
-      outfile = options.delete(:outfile)
-      res = get(bucket, "/#{filename}", options)
-      if outfile
-        File.open(outfile, 'w') {|f| f.write(res) }
-      else
-        res
-      end
+      get(bucket, "/#{filename}", options)
     end
     
     def delete_object(bucket, filename, options={})

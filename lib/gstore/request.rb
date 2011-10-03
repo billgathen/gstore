@@ -68,7 +68,7 @@ module GStore
         puts
       end
       
-      _http_do(method, host, path, params_to_request_string(params), headers.merge(:Authorization => authorization), options[:data])
+      _http_do(method, host, path, params_to_request_string(params), headers.merge(:Authorization => authorization), options)
     end
     
     private
@@ -77,7 +77,7 @@ module GStore
         b64_hmac = Base64.encode64(OpenSSL::HMAC.digest(digest, @secret_key, str)).gsub("\n","")
       end
       
-      def _http_do(method, host, path, params, headers, data=nil)
+      def _http_do(method, host, path, params, headers, options)
         http = Net::HTTP.new(host, 443)
         http.use_ssl = true
         http.set_debug_output $stderr if @debug
@@ -91,9 +91,22 @@ module GStore
             req[key.to_s] = value
           end
                     
-          response = http.request(req, data)
+          if options[:outfile]
+            File.open(options[:outfile], 'w') do |f|
+              http.request(req, options[:data]) do |response|
+                response.read_body do |str|
+                  f.write(str)
+                  f.flush
+                end
+              end
+            end
 
-          return method == Net::HTTP::Head ? response.header : response.body
+            return options[:outfile] # return filename where we saved the file
+          else
+            response = http.request(req, options[:data])
+            
+            return method == Net::HTTP::Head ? response.header : response.body
+          end
         end
       end
       
